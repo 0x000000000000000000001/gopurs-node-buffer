@@ -11,17 +11,17 @@ import (
 	"gopurs/output/gopurs_runtime"
 )
 
-func getBytes(val interface{}) []byte {
+func nodeBufferImmutable_getBytes(val interface{}) []byte {
     v := val.(gopurs_runtime.Value)
 	return (*(*any)(v.UnsafePtr)).([]byte)
 }
 
-func boxBytes(b []byte) gopurs_runtime.Value {
+func nodeBufferImmutable_boxBytes(b []byte) gopurs_runtime.Value {
 	return gopurs_runtime.Any(b)
 }
 
 var ShowImpl = gopurs_runtime.Func(func(a gopurs_runtime.Value) gopurs_runtime.Value {
-	b := getBytes(a)
+	b := nodeBufferImmutable_getBytes(a)
 	if len(b) > 50 {
 		return gopurs_runtime.Str(fmt.Sprintf("<Buffer % x ...>", b[:50]))
 	}
@@ -29,13 +29,13 @@ var ShowImpl = gopurs_runtime.Func(func(a gopurs_runtime.Value) gopurs_runtime.V
 })
 
 func EqImpl(a interface{}, b interface{}) interface{} {
-	b1 := getBytes(a)
-	b2 := getBytes(b)
+	b1 := nodeBufferImmutable_getBytes(a)
+	b2 := nodeBufferImmutable_getBytes(b)
 	return bytes.Equal(b1, b2)
 }
 
 func CompareImpl(a interface{}, b interface{}) interface{} {
-	cmp := bytes.Compare(getBytes(a), getBytes(b))
+	cmp := bytes.Compare(nodeBufferImmutable_getBytes(a), nodeBufferImmutable_getBytes(b))
 	if cmp < 0 {
 		return -1
 	} else if cmp > 0 {
@@ -45,8 +45,8 @@ func CompareImpl(a interface{}, b interface{}) interface{} {
 }
 
 func ComparePartsImpl(src interface{}, target interface{}, targetStart interface{}, targetEnd interface{}, sourceStart interface{}, sourceEnd interface{}) interface{} {
-	s := getBytes(src)
-	t := getBytes(target)
+	s := nodeBufferImmutable_getBytes(src)
+	t := nodeBufferImmutable_getBytes(target)
 	ts := int(targetStart.(gopurs_runtime.Value).IntVal)
 	te := int(targetEnd.(gopurs_runtime.Value).IntVal)
 	ss := int(sourceStart.(gopurs_runtime.Value).IntVal)
@@ -66,7 +66,7 @@ func ComparePartsImpl(src interface{}, target interface{}, targetStart interface
 
 var Alloc = gopurs_runtime.Func(func(size gopurs_runtime.Value) gopurs_runtime.Value {
 	sz := int(size.IntVal)
-	return boxBytes(make([]byte, sz))
+	return nodeBufferImmutable_boxBytes(make([]byte, sz))
 })
 
 var FromArray = gopurs_runtime.Func(func(octets gopurs_runtime.Value) gopurs_runtime.Value {
@@ -75,16 +75,16 @@ var FromArray = gopurs_runtime.Func(func(octets gopurs_runtime.Value) gopurs_run
 	for i, v := range arr {
 		b[i] = byte(v.IntVal)
 	}
-	return boxBytes(b)
+	return nodeBufferImmutable_boxBytes(b)
 })
 
 var Size = gopurs_runtime.Func(func(buff gopurs_runtime.Value) gopurs_runtime.Value {
-	b := getBytes(buff)
+	b := nodeBufferImmutable_getBytes(buff)
 	return gopurs_runtime.Int(int64(len(b)))
 })
 
 var ToArray = gopurs_runtime.Func(func(buff gopurs_runtime.Value) gopurs_runtime.Value {
-	b := getBytes(buff)
+	b := nodeBufferImmutable_getBytes(buff)
 	arr := make([]gopurs_runtime.Value, len(b))
 	for i, v := range b {
 		arr[i] = gopurs_runtime.Int(int64(v))
@@ -112,11 +112,11 @@ func FromStringImpl(str interface{}, encoding interface{}) interface{} {
 	default:
 		b = []byte(s)
 	}
-	return boxBytes(b)
+	return nodeBufferImmutable_boxBytes(b)
 }
 
 func ReadImpl(ty interface{}, offset interface{}, buf interface{}) interface{} {
-	b := getBytes(buf)
+	b := nodeBufferImmutable_getBytes(buf)
 	off := int(offset.(gopurs_runtime.Value).IntVal)
 	t := *(*string)(ty.(gopurs_runtime.Value).UnsafePtr)
 	var n float64
@@ -154,7 +154,7 @@ func ReadImpl(ty interface{}, offset interface{}, buf interface{}) interface{} {
 }
 
 func ReadStringImpl(enc interface{}, start interface{}, end interface{}, buff interface{}) interface{} {
-	b := getBytes(buff)
+	b := nodeBufferImmutable_getBytes(buff)
 	s := int(start.(gopurs_runtime.Value).IntVal)
 	e := int(end.(gopurs_runtime.Value).IntVal)
 	if s < 0 { s = 0 }
@@ -173,7 +173,7 @@ func ReadStringImpl(enc interface{}, start interface{}, end interface{}, buff in
 }
 
 func GetAtOffsetImpl(offset interface{}, buff interface{}) interface{} {
-	b := getBytes(buff)
+	b := nodeBufferImmutable_getBytes(buff)
 	off := int(offset.(gopurs_runtime.Value).IntVal)
 	if off < 0 || off >= len(b) {
 		return gopurs_runtime.Box(any(nil))
@@ -182,7 +182,7 @@ func GetAtOffsetImpl(offset interface{}, buff interface{}) interface{} {
 }
 
 func ToStringImpl(enc interface{}, buff interface{}) interface{} {
-	b := getBytes(buff)
+	b := nodeBufferImmutable_getBytes(buff)
 	encoding := *(*string)(enc.(gopurs_runtime.Value).UnsafePtr)
 	switch encoding {
 	case "hex":
@@ -195,7 +195,7 @@ func ToStringImpl(enc interface{}, buff interface{}) interface{} {
 }
 
 func ToStringSubImpl(enc interface{}, start interface{}, end interface{}, buff interface{}) interface{} {
-	b := getBytes(buff)
+	b := nodeBufferImmutable_getBytes(buff)
 	s := int(start.(gopurs_runtime.Value).IntVal)
 	e := int(end.(gopurs_runtime.Value).IntVal)
 	if s < 0 { s = 0 }
@@ -214,22 +214,22 @@ func ToStringSubImpl(enc interface{}, start interface{}, end interface{}, buff i
 }
 
 func SliceImpl(start interface{}, end interface{}, buff interface{}) interface{} {
-	b := getBytes(buff)
+	b := nodeBufferImmutable_getBytes(buff)
 	s := int(start.(gopurs_runtime.Value).IntVal)
 	e := int(end.(gopurs_runtime.Value).IntVal)
 	if s < 0 { s = 0 }
 	if e > len(b) { e = len(b) }
 	if s > e { s = e }
-	return boxBytes(b[s:e])
+	return nodeBufferImmutable_boxBytes(b[s:e])
 }
 
 var Concat = gopurs_runtime.Func(func(buffs gopurs_runtime.Value) gopurs_runtime.Value {
 	arr := *(*[]gopurs_runtime.Value)(buffs.UnsafePtr)
 	var bs [][]byte
 	for _, v := range arr {
-		bs = append(bs, getBytes(v))
+		bs = append(bs, nodeBufferImmutable_getBytes(v))
 	}
-	return boxBytes(bytes.Join(bs, nil))
+	return nodeBufferImmutable_boxBytes(bytes.Join(bs, nil))
 })
 
 func ConcatToLength(buffs interface{}, totalLength interface{}) interface{} {
@@ -237,7 +237,7 @@ func ConcatToLength(buffs interface{}, totalLength interface{}) interface{} {
 	total := int(totalLength.(gopurs_runtime.Value).IntVal)
 	b := make([]byte, 0, total)
 	for _, v := range arr {
-		b = append(b, getBytes(v)...)
+		b = append(b, nodeBufferImmutable_getBytes(v)...)
 		if len(b) >= total {
 			break
 		}
@@ -245,5 +245,5 @@ func ConcatToLength(buffs interface{}, totalLength interface{}) interface{} {
 	if len(b) > total {
 		b = b[:total]
 	}
-	return boxBytes(b)
+	return nodeBufferImmutable_boxBytes(b)
 }

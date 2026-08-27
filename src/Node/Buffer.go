@@ -9,22 +9,22 @@ import (
 	"gopurs/output/gopurs_runtime"
 )
 
-func getBytes(val gopurs_runtime.Value) []byte {
+func nodeBuffer_getBytes(val gopurs_runtime.Value) []byte {
 	return (*(*any)(val.UnsafePtr)).([]byte)
 }
 
-func boxBytes(b []byte) gopurs_runtime.Value {
+func nodeBuffer_boxBytes(b []byte) gopurs_runtime.Value {
 	return gopurs_runtime.Any(b)
 }
 
 var AllocUnsafeImpl = gopurs_runtime.Func(func(size gopurs_runtime.Value) gopurs_runtime.Value {
 	sz := int(size.IntVal)
-	return boxBytes(make([]byte, sz))
+	return nodeBuffer_boxBytes(make([]byte, sz))
 })
 
 var AllocUnsafeSlowImpl = gopurs_runtime.Func(func(size gopurs_runtime.Value) gopurs_runtime.Value {
 	sz := int(size.IntVal)
-	return boxBytes(make([]byte, sz))
+	return nodeBuffer_boxBytes(make([]byte, sz))
 })
 
 var FreezeImpl = gopurs_runtime.Func(func(a gopurs_runtime.Value) gopurs_runtime.Value {
@@ -39,7 +39,7 @@ var WriteInternal = gopurs_runtime.Func(func(ty gopurs_runtime.Value) gopurs_run
 	return gopurs_runtime.Func(func(value gopurs_runtime.Value) gopurs_runtime.Value {
 		return gopurs_runtime.Func(func(offset gopurs_runtime.Value) gopurs_runtime.Value {
 			return gopurs_runtime.Func(func(buf gopurs_runtime.Value) gopurs_runtime.Value {
-				b := getBytes(buf)
+				b := nodeBuffer_getBytes(buf)
 				off := int(offset.IntVal)
 				
 				// Read strings from `*string`
@@ -86,7 +86,7 @@ var WriteStringInternal = gopurs_runtime.Func(func(encoding gopurs_runtime.Value
 					off := int(offset.IntVal)
 					l := int(length.IntVal)
 					val := *(*string)(value.UnsafePtr)
-					b := getBytes(buff)
+					b := nodeBuffer_getBytes(buff)
 					
 					var decoded []byte
 					switch enc {
@@ -112,7 +112,7 @@ var WriteStringInternal = gopurs_runtime.Func(func(encoding gopurs_runtime.Value
 var SetAtOffsetImpl = gopurs_runtime.Func(func(value gopurs_runtime.Value) gopurs_runtime.Value {
 	return gopurs_runtime.Func(func(offset gopurs_runtime.Value) gopurs_runtime.Value {
 		return gopurs_runtime.Func(func(buff gopurs_runtime.Value) gopurs_runtime.Value {
-			b := getBytes(buff)
+			b := nodeBuffer_getBytes(buff)
 			off := int(offset.IntVal)
 			if off >= 0 && off < len(b) {
 				b[off] = byte(value.IntVal)
@@ -130,8 +130,8 @@ var CopyImpl = gopurs_runtime.Func(func(srcStart gopurs_runtime.Value) gopurs_ru
 					ss := int(srcStart.IntVal)
 					se := int(srcEnd.IntVal)
 					ts := int(targStart.IntVal)
-					s := getBytes(src)
-					t := getBytes(targ)
+					s := nodeBuffer_getBytes(src)
+					t := nodeBuffer_getBytes(targ)
 					
 					if ss < 0 { ss = 0 }
 					if se > len(s) { se = len(s) }
@@ -149,7 +149,7 @@ var FillImpl = gopurs_runtime.Func(func(octet gopurs_runtime.Value) gopurs_runti
 	return gopurs_runtime.Func(func(start gopurs_runtime.Value) gopurs_runtime.Value {
 		return gopurs_runtime.Func(func(end gopurs_runtime.Value) gopurs_runtime.Value {
 			return gopurs_runtime.Func(func(buf gopurs_runtime.Value) gopurs_runtime.Value {
-				b := getBytes(buf)
+				b := nodeBuffer_getBytes(buf)
 				val := byte(octet.IntVal)
 				s := int(start.IntVal)
 				e := int(end.IntVal)
@@ -177,7 +177,7 @@ var SetPoolSizeImpl = gopurs_runtime.Func(func(_ gopurs_runtime.Value) gopurs_ru
 })
 
 var Swap16Impl = gopurs_runtime.Func(func(buf gopurs_runtime.Value) gopurs_runtime.Value {
-	b := getBytes(buf)
+	b := nodeBuffer_getBytes(buf)
 	for i := 0; i < len(b)-1; i += 2 {
 		b[i], b[i+1] = b[i+1], b[i]
 	}
@@ -185,7 +185,7 @@ var Swap16Impl = gopurs_runtime.Func(func(buf gopurs_runtime.Value) gopurs_runti
 })
 
 var Swap32Impl = gopurs_runtime.Func(func(buf gopurs_runtime.Value) gopurs_runtime.Value {
-	b := getBytes(buf)
+	b := nodeBuffer_getBytes(buf)
 	for i := 0; i < len(b)-3; i += 4 {
 		b[i], b[i+1], b[i+2], b[i+3] = b[i+3], b[i+2], b[i+1], b[i]
 	}
@@ -193,7 +193,7 @@ var Swap32Impl = gopurs_runtime.Func(func(buf gopurs_runtime.Value) gopurs_runti
 })
 
 var Swap64Impl = gopurs_runtime.Func(func(buf gopurs_runtime.Value) gopurs_runtime.Value {
-	b := getBytes(buf)
+	b := nodeBuffer_getBytes(buf)
 	for i := 0; i < len(b)-7; i += 8 {
 		b[i], b[i+1], b[i+2], b[i+3], b[i+4], b[i+5], b[i+6], b[i+7] = b[i+7], b[i+6], b[i+5], b[i+4], b[i+3], b[i+2], b[i+1], b[i]
 	}
