@@ -101,8 +101,8 @@ var FromArrayBuffer = gopurs_runtime.Func(func(ab gopurs_runtime.Value) gopurs_r
 })
 
 func FromStringImpl(str interface{}, encoding interface{}) interface{} {
-	s := *(*string)(str.(gopurs_runtime.Value).UnsafePtr)
-	enc := *(*string)(encoding.(gopurs_runtime.Value).UnsafePtr)
+	s := gopurs_runtime.StrValue(str.(gopurs_runtime.Value))
+	enc := gopurs_runtime.StrValue(encoding.(gopurs_runtime.Value))
 	var b []byte
 	switch enc {
 	case "hex":
@@ -118,7 +118,7 @@ func FromStringImpl(str interface{}, encoding interface{}) interface{} {
 func ReadImpl(ty interface{}, offset interface{}, buf interface{}) interface{} {
 	b := nodeBufferImmutable_getBytes(buf)
 	off := int(offset.(gopurs_runtime.Value).IntVal)
-	t := *(*string)(ty.(gopurs_runtime.Value).UnsafePtr)
+	t := gopurs_runtime.StrValue(ty.(gopurs_runtime.Value))
 	var n float64
 	switch t {
 	case "UInt8":
@@ -161,7 +161,7 @@ func ReadStringImpl(enc interface{}, start interface{}, end interface{}, buff in
 	if e > len(b) { e = len(b) }
 	if s > e { s = e }
 	sub := b[s:e]
-	encoding := *(*string)(enc.(gopurs_runtime.Value).UnsafePtr)
+	encoding := gopurs_runtime.StrValue(enc.(gopurs_runtime.Value))
 	switch encoding {
 	case "hex":
 		return hex.EncodeToString(sub)
@@ -183,7 +183,7 @@ func GetAtOffsetImpl(offset interface{}, buff interface{}) interface{} {
 
 func ToStringImpl(enc interface{}, buff interface{}) interface{} {
 	b := nodeBufferImmutable_getBytes(buff)
-	encoding := *(*string)(enc.(gopurs_runtime.Value).UnsafePtr)
+	encoding := gopurs_runtime.StrValue(enc.(gopurs_runtime.Value))
 	switch encoding {
 	case "hex":
 		return hex.EncodeToString(b)
@@ -202,7 +202,7 @@ func ToStringSubImpl(enc interface{}, start interface{}, end interface{}, buff i
 	if e > len(b) { e = len(b) }
 	if s > e { s = e }
 	sub := b[s:e]
-	encoding := *(*string)(enc.(gopurs_runtime.Value).UnsafePtr)
+	encoding := gopurs_runtime.StrValue(enc.(gopurs_runtime.Value))
 	switch encoding {
 	case "hex":
 		return hex.EncodeToString(sub)

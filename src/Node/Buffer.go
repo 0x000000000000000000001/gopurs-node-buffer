@@ -43,7 +43,7 @@ var WriteInternal = gopurs_runtime.Func(func(ty gopurs_runtime.Value) gopurs_run
 				off := int(offset.IntVal)
 				
 				// Read strings from `*string`
-				t := *(*string)(ty.UnsafePtr)
+				t := gopurs_runtime.StrValue(ty)
 				
 				// The value could be a Float or Int, handle carefully.
 				// In PureScript, `value` parameter for `WriteInternal` is `Number`.
@@ -82,10 +82,10 @@ var WriteStringInternal = gopurs_runtime.Func(func(encoding gopurs_runtime.Value
 		return gopurs_runtime.Func(func(length gopurs_runtime.Value) gopurs_runtime.Value {
 			return gopurs_runtime.Func(func(value gopurs_runtime.Value) gopurs_runtime.Value {
 				return gopurs_runtime.Func(func(buff gopurs_runtime.Value) gopurs_runtime.Value {
-					enc := *(*string)(encoding.UnsafePtr)
+					enc := gopurs_runtime.StrValue(encoding)
 					off := int(offset.IntVal)
 					l := int(length.IntVal)
-					val := *(*string)(value.UnsafePtr)
+					val := gopurs_runtime.StrValue(value)
 					b := nodeBuffer_getBytes(buff)
 					
 					var decoded []byte
